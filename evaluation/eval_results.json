@@ -1,0 +1,141 @@
+{
+  "timestamp": "2026-10-19 01:40:45",
+  "model": "openai/gpt-oss-120b",
+  "embeddings": "sentence-transformers/all-MiniLM-L6-v2",
+  "metrics": {
+    "faithfulness": 0.6667,
+    "answer_relevancy": 0.6587,
+    "context_precision": 1.0,
+    "context_recall": 1.0
+  },
+  "test_cases": [
+    {
+      "id": "q1",
+      "question": "What is the purpose of this dummy PDF file?",
+      "ground_truth": "This dummy PDF file was created for testing RAG pipelines.",
+      "generated_answer": "The dummy PDF file was created specifically to test Retrieval‑Augmented Generation (RAG) pipelines, serving as a test document for evaluating how well the vector database retrieves chunks and how accurately the LLM generates answers without hallucination. [1]\n\n### Sources & Citations\n- **dummy_rag_test.pdf**, Page 1 [1]",
+      "retrieved_chunks_count": 1,
+      "citations": [
+        {
+          "citation_id": 1,
+          "source": "dummy_rag_test.pdf",
+          "page": 1,
+          "preview": "This is a dummy PDF file created for testing RAG pipelines.\nSection 1: Retrieval tests how well the vector database finds this chunk.\nSection 2: Generation tests if the LLM answers accurately without ..."
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "question": "What does Section 1 of the document test?",
+      "ground_truth": "Section 1 tests retrieval, specifically how well the vector database finds this chunk.",
+      "generated_answer": "Section 1 tests the retrieval capability, specifically how well the vector database can locate that particular chunk of text.  \n\n### Sources & Citations\n- **dummy_rag_test.pdf**, Page 1 [1]",
+      "retrieved_chunks_count": 1,
+      "citations": [
+        {
+          "citation_id": 1,
+          "source": "dummy_rag_test.pdf",
+          "page": 1,
+          "preview": "This is a dummy PDF file created for testing RAG pipelines.\nSection 1: Retrieval tests how well the vector database finds this chunk.\nSection 2: Generation tests if the LLM answers accurately without ..."
+        }
+      ]
+    },
+    {
+      "id": "q3",
+      "question": "How does the document test the vector database?",
+      "ground_truth": "Section 1 tests how well the vector database can find and retrieve the text chunk.",
+      "generated_answer": "The document includes a **Retrieval** section (Section 1) that explicitly tests the vector database by checking how well it can locate the specific chunk of text.  \n\n### Sources & Citations\n- **dummy_rag_test.pdf**, Page 1 [1]",
+      "retrieved_chunks_count": 1,
+      "citations": [
+        {
+          "citation_id": 1,
+          "source": "dummy_rag_test.pdf",
+          "page": 1,
+          "preview": "This is a dummy PDF file created for testing RAG pipelines.\nSection 1: Retrieval tests how well the vector database finds this chunk.\nSection 2: Generation tests if the LLM answers accurately without ..."
+        }
+      ]
+    },
+    {
+      "id": "q4",
+      "question": "What does Section 2 evaluate in the RAG pipeline?",
+      "ground_truth": "Section 2 tests generation, specifically if the LLM answers accurately without hallucination.",
+      "generated_answer": "Section 2 evaluates the generation step of the RAG pipeline, specifically testing whether the LLM provides accurate answers without hallucination. [1]\n\n### Sources & Citations\n- **dummy_rag_test.pdf**, Page 1 [1]",
+      "retrieved_chunks_count": 1,
+      "citations": [
+        {
+          "citation_id": 1,
+          "source": "dummy_rag_test.pdf",
+          "page": 1,
+          "preview": "This is a dummy PDF file created for testing RAG pipelines.\nSection 1: Retrieval tests how well the vector database finds this chunk.\nSection 2: Generation tests if the LLM answers accurately without ..."
+        }
+      ]
+    },
+    {
+      "id": "q5",
+      "question": "How does the document verify that the LLM does not hallucinate?",
+      "ground_truth": "Section 2 tests generation to check if the LLM answers accurately without hallucination.",
+      "generated_answer": "I could not find this information in the provided documents.",
+      "retrieved_chunks_count": 0,
+      "citations": []
+    },
+    {
+      "id": "q6",
+      "question": "What are the two main sections described in the test document?",
+      "ground_truth": "Section 1 on retrieval testing vector database search and Section 2 on generation testing accurate LLM responses without hallucination.",
+      "generated_answer": "The test document describes two main sections:\n\n- **Section 1: Retrieval** – tests how well the vector database finds the chunk.  \n- **Section 2: Generation** – tests if the LLM answers accurately without hallucination.  \n\n### Sources & Citations\n- **dummy_rag_test.pdf**, Page 1 [1]",
+      "retrieved_chunks_count": 1,
+      "citations": [
+        {
+          "citation_id": 1,
+          "source": "dummy_rag_test.pdf",
+          "page": 1,
+          "preview": "This is a dummy PDF file created for testing RAG pipelines.\nSection 1: Retrieval tests how well the vector database finds this chunk.\nSection 2: Generation tests if the LLM answers accurately without ..."
+        }
+      ]
+    },
+    {
+      "id": "q7",
+      "question": "Does Section 1 test generation or retrieval?",
+      "ground_truth": "Section 1 tests retrieval.",
+      "generated_answer": "Section 1 tests retrieval, not generation. It is described as “Retrieval tests how well the vector database finds this chunk.”  \n\n### Sources & Citations\n- **dummy_rag_test.pdf**, Page 1 [1]",
+      "retrieved_chunks_count": 1,
+      "citations": [
+        {
+          "citation_id": 1,
+          "source": "dummy_rag_test.pdf",
+          "page": 1,
+          "preview": "This is a dummy PDF file created for testing RAG pipelines.\nSection 1: Retrieval tests how well the vector database finds this chunk.\nSection 2: Generation tests if the LLM answers accurately without ..."
+        }
+      ]
+    },
+    {
+      "id": "q8",
+      "question": "Does Section 2 test vector database chunk finding or generation accuracy?",
+      "ground_truth": "Section 2 tests generation accuracy to ensure the LLM answers without hallucination.",
+      "generated_answer": "Section 2 tests generation accuracy, not vector‑database chunk finding.  \n\n### Sources & Citations\n- **dummy_rag_test.pdf**, Page 1 [1]",
+      "retrieved_chunks_count": 1,
+      "citations": [
+        {
+          "citation_id": 1,
+          "source": "dummy_rag_test.pdf",
+          "page": 1,
+          "preview": "This is a dummy PDF file created for testing RAG pipelines.\nSection 1: Retrieval tests how well the vector database finds this chunk.\nSection 2: Generation tests if the LLM answers accurately without ..."
+        }
+      ]
+    },
+    {
+      "id": "q9",
+      "question": "What pipeline architecture is being tested by this sample PDF?",
+      "ground_truth": "RAG (Retrieval-Augmented Generation) pipelines.",
+      "generated_answer": "The sample PDF is used to test a **Retrieval‑Augmented Generation (RAG) pipeline**, checking both the vector‑database retrieval step and the downstream LLM generation for accuracy and hallucination‑free responses.  \n\n### Sources & Citations\n- **dummy_rag_test.pdf**, Page 1 [1]",
+      "retrieved_chunks_count": 1,
+      "citations": [
+        {
+          "citation_id": 1,
+          "source": "dummy_rag_test.pdf",
+          "page": 1,
+          "preview": "This is a dummy PDF file created for testing RAG pipelines.\nSection 1: Retrieval tests how well the vector database finds this chunk.\nSection 2: Generation tests if the LLM answers accurately without ..."
+        }
+      ]
+    }
+  ]
+}

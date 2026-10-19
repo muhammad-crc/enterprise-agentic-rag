@@ -1,0 +1,31 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Environment variables (NEVER COMMIT SECRETS)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Node / Next.js
+node_modules/
+web/node_modules/
+frontend/node_modules/
+.next/
+web/.next/
+web/out/
+*.tsbuildinfo
+
+# OS files
+.DS_Store
+Thumbs.db

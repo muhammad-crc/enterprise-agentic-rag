@@ -1,0 +1,56 @@
+[
+  {
+    "id": "q1",
+    "question": "What is the purpose of this dummy PDF file?",
+    "ground_truth": "This dummy PDF file was created for testing RAG pipelines.",
+    "expected_source": "dummy_rag_test.pdf"
+  },
+  {
+    "id": "q2",
+    "question": "What does Section 1 of the document test?",
+    "ground_truth": "Section 1 tests retrieval, specifically how well the vector database finds this chunk.",
+    "expected_source": "dummy_rag_test.pdf"
+  },
+  {
+    "id": "q3",
+    "question": "How does the document test the vector database?",
+    "ground_truth": "Section 1 tests how well the vector database can find and retrieve the text chunk.",
+    "expected_source": "dummy_rag_test.pdf"
+  },
+  {
+    "id": "q4",
+    "question": "What does Section 2 evaluate in the RAG pipeline?",
+    "ground_truth": "Section 2 tests generation, specifically if the LLM answers accurately without hallucination.",
+    "expected_source": "dummy_rag_test.pdf"
+  },
+  {
+    "id": "q5",
+    "question": "How does the document verify that the LLM does not hallucinate?",
+    "ground_truth": "Section 2 tests generation to check if the LLM answers accurately without hallucination.",
+    "expected_source": "dummy_rag_test.pdf"
+  },
+  {
+    "id": "q6",
+    "question": "What are the two main sections described in the test document?",
+    "ground_truth": "Section 1 on retrieval testing vector database search and Section 2 on generation testing accurate LLM responses without hallucination.",
+    "expected_source": "dummy_rag_test.pdf"
+  },
+  {
+    "id": "q7",
+    "question": "Does Section 1 test generation or retrieval?",
+    "ground_truth": "Section 1 tests retrieval.",
+    "expected_source": "dummy_rag_test.pdf"
+  },
+  {
+    "id": "q8",
+    "question": "Does Section 2 test vector database chunk finding or generation accuracy?",
+    "ground_truth": "Section 2 tests generation accuracy to ensure the LLM answers without hallucination.",
+    "expected_source": "dummy_rag_test.pdf"
+  },
+  {
+    "id": "q9",
+    "question": "What pipeline architecture is being tested by this sample PDF?",
+    "ground_truth": "RAG (Retrieval-Augmented Generation) pipelines.",
+    "expected_source": "dummy_rag_test.pdf"
+  }
+]

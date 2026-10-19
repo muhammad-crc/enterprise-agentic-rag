@@ -1,0 +1,2 @@
+# Data directory for enterprise documents (PDFs, docs, etc.)
+# Documents placed here will be processed by app/rag/ingest.py
