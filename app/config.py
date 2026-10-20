@@ -19,9 +19,9 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
 
     # Model Provider & Names
-    LLM_PROVIDER: Literal["openai", "groq"] = "openai"
-    DEFAULT_MODEL: str = "gpt-4o-mini"
-    GROQ_MODEL: str = "llama3-70b-8192"
+    LLM_PROVIDER: Literal["openai", "groq"] = "groq"
+    DEFAULT_MODEL: str = "openai/gpt-oss-120b"
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
     TEMPERATURE: float = 0.0
 
     # Vector Store Settings

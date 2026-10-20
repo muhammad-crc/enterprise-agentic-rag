@@ -20,9 +20,28 @@ from app.rag.prompts import (
 logger = logging.getLogger("enterprise_rag.agent")
 settings = get_settings()
 
-GROQ_MODEL_NAME = settings.GROQ_MODEL if settings.GROQ_MODEL else "llama-3.3-70b-versatile"
+def resolve_groq_model() -> str:
+    """Return an active, supported Groq model identifier."""
+    raw = (settings.GROQ_MODEL or os.getenv("GROQ_MODEL", "")).strip()
+    # Replace decommissioned or unsupported model names automatically
+    if not raw or "llama3-70b-8192" in raw or "llama-3.3" in raw or "llama-3.1" in raw:
+        return "openai/gpt-oss-120b"
+    return raw
+
+
+def get_groq_llm(temperature: float = 0.2, model_override: Optional[str] = None) -> ChatGroq:
+    """Instantiate and return the Groq Chat model with configured temperature."""
+    api_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY", "")
+    model_name = model_override or resolve_groq_model()
+    return ChatGroq(
+        model=model_name,
+        temperature=temperature,
+        api_key=api_key,
+    )
+
+
 MAX_RETRIES = 2
-SUMMARY_THRESHOLD = 6  # Trigger summarization when history exceeds 6 messages
+SUMMARY_THRESHOLD = 6
 
 GUARDRAIL_NOT_FOUND_MESSAGE = (
     "I could not find this information in the provided documents."
@@ -43,16 +62,6 @@ class AgentState(TypedDict, total=False):
     chat_history: List[BaseMessage]
     summary: str
     citations: List[Dict[str, Any]]
-
-
-def get_groq_llm(temperature: float = 0.2) -> ChatGroq:
-    """Instantiate and return the Groq Chat model with configured temperature."""
-    api_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY", "")
-    return ChatGroq(
-        model=GROQ_MODEL_NAME,
-        temperature=temperature,
-        api_key=api_key,
-    )
 
 
 # =========================================================================
@@ -370,8 +379,18 @@ def generate_node(state: AgentState) -> Dict[str, Any]:
     user_message_content = build_rag_user_message(question=question, context=context_str)
     messages.append(HumanMessage(content=user_message_content))
 
-    response = llm.invoke(messages)
-    answer_text = response.content.strip()
+    try:
+        response = llm.invoke(messages)
+        answer_text = response.content.strip()
+    except Exception as exc:
+        logger.warning("Primary LLM generation failed (%s). Retrying with fallback model...", exc)
+        try:
+            fallback_llm = get_groq_llm(temperature=0.2, model_override="openai/gpt-oss-20b")
+            response = fallback_llm.invoke(messages)
+            answer_text = response.content.strip()
+        except Exception as fb_exc:
+            logger.error("LLM Generation failed: %s", fb_exc)
+            answer_text = f"An error occurred while generating the answer: {str(exc)}"
 
     # Guardrail check
     if GUARDRAIL_NOT_FOUND_MESSAGE.lower() in answer_text.lower():
