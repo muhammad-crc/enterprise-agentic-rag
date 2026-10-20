@@ -37,7 +37,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allows Next.js frontend or any client origin
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -98,6 +98,19 @@ class HealthResponse(BaseModel):
 # =========================================================================
 # API Endpoints
 # =========================================================================
+
+@app.get("/", tags=["Health"])
+async def root():
+    """Root endpoint verifying API online status."""
+    return {
+        "status": "online",
+        "app_name": settings.APP_NAME,
+        "docs": "/docs",
+        "health": "/health",
+        "llm_provider": settings.LLM_PROVIDER,
+        "embedding_provider": settings.EMBEDDING_PROVIDER,
+    }
+
 
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
 async def health_check():
@@ -272,9 +285,10 @@ async def upload_and_ingest(files: List[UploadFile] = File(...)):
 if __name__ == "__main__":
     import uvicorn
 
+    port = int(os.getenv("PORT", settings.PORT or settings.APP_PORT))
     uvicorn.run(
         "app.main:app",
         host=settings.APP_HOST,
-        port=settings.APP_PORT,
+        port=port,
         reload=settings.DEBUG,
     )

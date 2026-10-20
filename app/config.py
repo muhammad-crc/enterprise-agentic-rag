@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Literal
+from typing import Literal, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
+    PORT: Optional[int] = None
     DEBUG: bool = True
 
     # API Keys
@@ -31,7 +32,7 @@ class Settings(BaseSettings):
     COLLECTION_NAME: str = "enterprise_knowledge_base"
 
     # Embeddings
-    EMBEDDING_PROVIDER: Literal["openai", "huggingface"] = "huggingface"
+    EMBEDDING_PROVIDER: Literal["openai", "huggingface", "fastembed"] = "fastembed"
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
 
     # Ingestion & Splitting

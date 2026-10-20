@@ -56,7 +56,16 @@ def get_embedding_function():
             openai_api_key=api_key,
         )
 
-    # HuggingFace / Local embeddings (Free, no OpenAI key required)
+    # FastEmbed / Local Embeddings (Ultra-lightweight ONNX runtime ~120MB RAM, zero PyTorch overhead)
+    # Uses the exact same model weights (e.g. sentence-transformers/all-MiniLM-L6-v2) with identical 384-dim vectors
+    try:
+        from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+        logger.info("Loading FastEmbed embeddings (model: %s)...", settings.EMBEDDING_MODEL)
+        return FastEmbedEmbeddings(model_name=settings.EMBEDDING_MODEL)
+    except Exception as fe_err:
+        logger.warning("FastEmbed not loaded (%s), attempting HuggingFace fallback.", fe_err)
+
+    # HuggingFace fallback (Standard PyTorch transformer)
     try:
         # Compatibility stub for Windows environments where pyarrow DLL is blocked by Application Control policies
         if "datasets" not in sys.modules:
@@ -83,7 +92,7 @@ def get_embedding_function():
             from langchain_community.embeddings import HuggingFaceEmbeddings
         return HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
     except Exception as e:
-        logger.error("Failed to load HuggingFaceEmbeddings: %s", e)
+        logger.error("Failed to load embeddings: %s", e)
         raise RuntimeError(
             f"Could not load embedding model '{settings.EMBEDDING_MODEL}'. Error: {e}"
         )

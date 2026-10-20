@@ -6,6 +6,7 @@ import {
   ArrowUp,
   BarChart3,
   Database,
+  Check,
   FileSearch,
   Loader2,
   MessageSquarePlus,
@@ -16,6 +17,7 @@ import {
   Settings2,
   Sparkles,
   Trash2,
+  X,
   Zap,
 } from "lucide-react";
 import { ChatMessage, HealthResponse } from "@/types/rag";
@@ -30,7 +32,8 @@ const suggestions = [
 ];
 
 export function RagChatApp() {
-  const [backendUrl, setBackendUrl] = useState(() => process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000");
+  const [backendUrl, setBackendUrl] = useState<string>("http://localhost:8000");
+  const [tempUrl, setTempUrl] = useState<string>("");
   const [showConfig, setShowConfig] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -45,6 +48,21 @@ export function RagChatApp() {
   const splitContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Initialize backend URL from localStorage or environment fallback
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("rag_backend_url") : null;
+    const fallback =
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      (typeof window !== "undefined" &&
+      window.location.hostname !== "localhost" &&
+      !window.location.hostname.includes("127.0.0.1")
+        ? "https://enterprise-agentic-rag-d20x.onrender.com"
+        : "http://localhost:8000");
+    const initial = saved || fallback;
+    setBackendUrl(initial);
+    setTempUrl(initial);
+  }, []);
+
   const checkHealth = async (targetUrl?: string) => {
     const url = targetUrl || backendUrl;
     try {
@@ -56,14 +74,17 @@ export function RagChatApp() {
   };
 
   useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_API_BASE_URL || `http://${window.location.hostname || "localhost"}:${DEFAULT_PORT}`;
+    if (!backendUrl) return;
     const ping = () => {
-      fetch(`${url}/health`).then((response) => (response.ok ? response.json() : null)).then(setHealth).catch(() => setHealth(null));
+      fetch(`${backendUrl}/health`)
+        .then((response) => (response.ok ? response.json() : null))
+        .then(setHealth)
+        .catch(() => setHealth(null));
     };
     ping();
-    const timer = window.setInterval(ping, 5000);
+    const timer = window.setInterval(ping, 6000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [backendUrl]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -144,7 +165,10 @@ export function RagChatApp() {
         },
       ]);
     } catch (error) {
-      const detail = error instanceof Error ? error.message : "Error contacting backend.";
+      const isFetchFail = error instanceof Error && error.message.toLowerCase().includes("fetch");
+      const detail = isFetchFail
+        ? `Could not reach backend at \`${backendUrl}\`. If hosted on Render free tier, it may be waking up from sleep (~50s). You can also click the ⚙️ Settings icon in the header to verify or change your backend URL.`
+        : (error instanceof Error ? error.message : "Error contacting backend.");
       setMessages((current) => [
         ...current,
         {
@@ -370,6 +394,103 @@ export function RagChatApp() {
           </div>
         </main>
       </div>
+
+      {/* Settings Modal */}
+      {showConfig && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+              <div className="flex items-center gap-2">
+                <Settings2 className="h-5 w-5 text-emerald-600" />
+                <h3 className="font-semibold text-zinc-900">Backend Connection</h3>
+              </div>
+              <button
+                onClick={() => setShowConfig(false)}
+                className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                  Backend API URL
+                </label>
+                <input
+                  type="text"
+                  value={tempUrl}
+                  onChange={(e) => setTempUrl(e.target.value)}
+                  placeholder="https://your-backend.onrender.com"
+                  className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm text-zinc-800 outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+
+              {/* Status Indicator */}
+              <div className="flex items-center justify-between rounded-xl bg-zinc-50 p-3 text-xs">
+                <span className="text-zinc-600">Current Status:</span>
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      health ? "bg-emerald-500 animate-pulse" : "bg-amber-400"
+                    }`}
+                  />
+                  {health ? `Connected (${health.llm_provider || "active"})` : "Disconnected / Connecting"}
+                </span>
+              </div>
+
+              {/* Quick Presets */}
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-500 mb-1.5">
+                  Quick Presets:
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTempUrl("https://enterprise-agentic-rag-d20x.onrender.com")}
+                    className="flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition"
+                  >
+                    ☁️ Render Cloud
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTempUrl("http://localhost:8000")}
+                    className="flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition"
+                  >
+                    💻 Localhost:8000
+                  </button>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowConfig(false)}
+                  className="rounded-xl px-4 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cleanUrl = tempUrl.trim().replace(/\/+$/, "");
+                    setBackendUrl(cleanUrl);
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("rag_backend_url", cleanUrl);
+                    }
+                    checkHealth(cleanUrl);
+                    setShowConfig(false);
+                  }}
+                  className="rounded-xl bg-[#173c2d] px-4 py-2 text-xs font-medium text-white hover:bg-[#0d2d20] transition"
+                >
+                  Save & Connect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
