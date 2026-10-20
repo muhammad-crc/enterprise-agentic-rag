@@ -9,6 +9,7 @@ import {
   Check,
   FileSearch,
   Loader2,
+  Menu,
   MessageSquarePlus,
   PanelLeftClose,
   PanelLeftOpen,
@@ -36,6 +37,8 @@ export function RagChatApp() {
   const [tempUrl, setTempUrl] = useState<string>("");
   const [showConfig, setShowConfig] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [mobileDocOpen, setMobileDocOpen] = useState(false);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [inputQuery, setInputQuery] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -186,25 +189,48 @@ export function RagChatApp() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#fcfcfc] text-[#151515]">
-      <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-[#e5e5e5] bg-white px-5">
-        <div className="flex items-center gap-5">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-[#151515] text-sm font-bold text-white">
+      <header className="flex h-14 md:h-[72px] shrink-0 items-center justify-between border-b border-[#e5e5e5] bg-white px-3 md:px-5">
+        <div className="flex items-center gap-2.5 md:gap-5">
+          {/* Mobile Hamburger Button */}
+          <button
+            onClick={() => setMobileNavOpen(true)}
+            className="md:hidden grid h-9 w-9 place-items-center rounded-lg text-zinc-600 hover:bg-zinc-100 active:bg-zinc-200"
+            aria-label="Open menu"
+            title="Navigation menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+
+          <div className="grid h-7 w-7 md:h-8 md:w-8 place-items-center rounded-lg bg-[#151515] text-xs md:text-sm font-bold text-white">
             A
           </div>
-          <span className="text-xl text-zinc-300">/</span>
-          <span className="text-sm font-semibold">Atlas workspace</span>
-          <span className="rounded-full border border-zinc-200 px-2 py-0.5 text-xs text-zinc-500">RAG</span>
-          <span className="hidden text-xl text-zinc-300 sm:inline">/</span>
-          <span className="hidden text-sm text-zinc-700 sm:inline">Knowledge agent</span>
+          <span className="hidden sm:inline text-xl text-zinc-300">/</span>
+          <span className="text-xs md:text-sm font-semibold truncate">Atlas workspace</span>
+          <span className="rounded-full border border-zinc-200 px-1.5 md:px-2 py-0.5 text-[10px] md:text-xs text-zinc-500">RAG</span>
+          <span className="hidden lg:inline text-xl text-zinc-300">/</span>
+          <span className="hidden lg:inline text-sm text-zinc-700">Knowledge agent</span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-2 text-xs text-zinc-500 sm:flex">
+
+        <div className="flex items-center gap-1.5 md:gap-3">
+          {/* Mobile Document Library / Upload Button */}
+          <button
+            onClick={() => setMobileDocOpen(true)}
+            className="md:hidden flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+            title="Upload and browse documents"
+          >
+            <Database className="h-3.5 w-3.5 text-emerald-600" />
+            <span>Docs</span>
+          </button>
+
+          <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-500">
             <span className={`h-2 w-2 rounded-full ${health ? "bg-emerald-500" : "bg-amber-400"}`} />
             {health ? "Trained" : "Connecting"}
           </div>
+
           <button
             onClick={() => setShowConfig((value) => !value)}
-            className="grid h-9 w-9 place-items-center rounded-lg text-zinc-500 hover:bg-zinc-100"
+            className="grid h-8 w-8 md:h-9 md:w-9 place-items-center rounded-lg text-zinc-500 hover:bg-zinc-100"
+            title="Backend Settings"
           >
             <Settings2 className="h-4 w-4" />
           </button>
@@ -212,7 +238,8 @@ export function RagChatApp() {
       </header>
 
       <div ref={splitContainerRef} className="flex min-h-0 flex-1 relative overflow-hidden">
-        <aside className="flex w-[260px] lg:w-[280px] shrink-0 flex-col border-r border-zinc-200 bg-[#fbfbfb] p-3">
+        {/* Desktop Sidebar: Hidden on Mobile */}
+        <aside className="hidden md:flex w-[240px] lg:w-[260px] shrink-0 flex-col border-r border-zinc-200 bg-[#fbfbfb] p-3">
           <nav className="space-y-1">
             {[
               [Play, "Playground"],
@@ -224,6 +251,9 @@ export function RagChatApp() {
             ].map(([Icon, label]) => (
               <button
                 key={String(label)}
+                onClick={() => {
+                  if (label === "Settings") setShowConfig(true);
+                }}
                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${
                   label === "Playground"
                     ? "border border-zinc-200 bg-white font-medium shadow-sm"
@@ -249,8 +279,9 @@ export function RagChatApp() {
           </div>
         </aside>
 
+        {/* Desktop IngestPanel: Hidden on Mobile (Mobile uses top Docs button) */}
         {showSidebar && (
-          <>
+          <div className="hidden md:flex shrink-0 h-full">
             <IngestPanel backendUrl={backendUrl} width={ingestWidth} />
             {/* Draggable Divider to resize Document Library & Chat */}
             <div
@@ -262,22 +293,22 @@ export function RagChatApp() {
             >
               <div className="h-9 w-1 rounded-full bg-zinc-400/80 group-hover:bg-white group-active:bg-white transition-colors" />
             </div>
-          </>
+          </div>
         )}
 
-        <main className="relative flex min-w-0 flex-1 flex-col dot-canvas overflow-hidden">
-          <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-zinc-200 bg-white/80 px-6 backdrop-blur-xl">
-            <div className="flex items-center gap-3">
+        <main className="relative flex min-w-0 flex-1 flex-col dot-canvas overflow-hidden w-full">
+          <header className="flex h-14 md:h-[72px] shrink-0 items-center justify-between border-b border-zinc-200 bg-white/80 px-4 md:px-6 backdrop-blur-xl">
+            <div className="flex items-center gap-2 md:gap-3">
               <button
                 onClick={() => setShowSidebar((value) => !value)}
-                className="grid h-9 w-9 place-items-center rounded-lg text-zinc-500 hover:bg-zinc-100"
+                className="hidden md:grid h-9 w-9 place-items-center rounded-lg text-zinc-500 hover:bg-zinc-100"
                 title="Toggle setup panel"
               >
                 {showSidebar ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
               </button>
               <div>
-                <h1 className="text-sm font-semibold">Knowledge agent</h1>
-                <p className="mt-0.5 text-[11px] text-zinc-500">Ask questions grounded in your documents</p>
+                <h1 className="text-xs md:text-sm font-semibold">Knowledge agent</h1>
+                <p className="mt-0.5 text-[10px] md:text-[11px] text-zinc-500 truncate max-w-[200px] sm:max-w-none">Ask questions grounded in your documents</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -394,6 +425,92 @@ export function RagChatApp() {
           </div>
         </main>
       </div>
+
+      {/* Mobile Navigation Drawer */}
+      {mobileNavOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div
+            onClick={() => setMobileNavOpen(false)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+          />
+          <aside className="relative flex w-[280px] max-w-[80vw] flex-col bg-white p-4 shadow-2xl z-10 h-full">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100 mb-2">
+              <div className="flex items-center gap-2">
+                <div className="grid h-7 w-7 place-items-center rounded-lg bg-[#151515] text-xs font-bold text-white">
+                  A
+                </div>
+                <span className="text-sm font-semibold text-zinc-900">Atlas workspace</span>
+              </div>
+              <button
+                onClick={() => setMobileNavOpen(false)}
+                className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <nav className="space-y-1 mt-2">
+              {[
+                [Play, "Playground"],
+                [Activity, "Activity"],
+                [BarChart3, "Analytics"],
+                [Database, "Data sources"],
+                [Zap, "Actions"],
+                [Settings2, "Settings"],
+              ].map(([Icon, label]) => (
+                <button
+                  key={String(label)}
+                  onClick={() => {
+                    if (label === "Settings") setShowConfig(true);
+                    if (label === "Data sources") setMobileDocOpen(true);
+                    setMobileNavOpen(false);
+                  }}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${
+                    label === "Playground"
+                      ? "border border-zinc-200 bg-zinc-50 font-medium text-zinc-900"
+                      : "text-zinc-500 hover:bg-zinc-50"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {String(label)}
+                </button>
+              ))}
+            </nav>
+
+            <div className="mt-auto rounded-xl bg-[#191919] p-4 text-white">
+              <p className="text-sm font-medium">Getting started ›</p>
+              <p className="mt-1 text-xs text-zinc-400">Your knowledge agent is ready</p>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* Mobile Document Library Drawer */}
+      {mobileDocOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex justify-end">
+          <div
+            onClick={() => setMobileDocOpen(false)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+          />
+          <div className="relative flex w-[360px] max-w-[90vw] flex-col bg-white shadow-2xl z-10 h-full overflow-hidden">
+            <div className="flex items-center justify-between p-3.5 border-b border-zinc-100 bg-zinc-50/80">
+              <div className="flex items-center gap-2">
+                <Database className="h-4 w-4 text-emerald-600" />
+                <span className="text-sm font-semibold text-zinc-900">Document Library</span>
+              </div>
+              <button
+                onClick={() => setMobileDocOpen(false)}
+                className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <IngestPanel backendUrl={backendUrl} onIngestSuccess={() => setMobileDocOpen(false)} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Settings Modal */}
       {showConfig && (
