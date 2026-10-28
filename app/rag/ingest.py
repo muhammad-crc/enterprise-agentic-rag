@@ -287,12 +287,17 @@ def ingest_to_vector_store(
             settings.COLLECTION_NAME,
         )
         os.makedirs(settings.CHROMA_PERSIST_DIR, exist_ok=True)
-        vector_store = Chroma.from_documents(
-            documents=chunks,
-            embedding=embeddings,
+        vector_store = Chroma(
             persist_directory=settings.CHROMA_PERSIST_DIR,
             collection_name=settings.COLLECTION_NAME,
+            embedding_function=embeddings,
         )
+        # Add chunks in small memory-safe batches (16 chunks at a time) to prevent memory spikes
+        batch_size = 16
+        for i in range(0, len(chunks), batch_size):
+            chunk_batch = chunks[i : i + batch_size]
+            vector_store.add_documents(chunk_batch)
+
         logger.info("Successfully persisted %d chunks into ChromaDB.", len(chunks))
         return vector_store
 

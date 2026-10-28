@@ -107,7 +107,10 @@ export function IngestPanel({ backendUrl, onIngestSuccess, width }: IngestPanelP
         onIngestSuccess(data.message);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Document upload failed.";
+      const isFetchFail = err instanceof Error && err.message.toLowerCase().includes("fetch");
+      const msg = isFetchFail
+        ? `Could not reach backend at ${backendUrl}. If hosted on Render free tier, it may be waking up from sleep (~50s). Please wait a moment and try again.`
+        : (err instanceof Error ? err.message : "Document upload failed.");
       setStatusMessage({ type: "error", text: msg });
     } finally {
       setUploading(false);

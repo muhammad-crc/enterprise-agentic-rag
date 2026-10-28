@@ -12,7 +12,8 @@ from langchain_core.messages import HumanMessage, AIMessage
 
 from app.config import get_settings
 from app.rag.graph import rag_graph
-from app.rag.ingest import load_documents_from_directory, ingest_to_vector_store
+from app.rag.ingest import load_single_pdf, load_documents_from_directory, ingest_to_vector_store
+
 
 # --- Logging Setup ---
 logging.basicConfig(
@@ -239,6 +240,7 @@ async def upload_and_ingest(files: List[UploadFile] = File(...)):
         )
 
     processed_files = []
+    new_documents = []
     try:
         for file in files:
             if not file.filename or not file.filename.lower().endswith(".pdf"):
@@ -252,15 +254,25 @@ async def upload_and_ingest(files: List[UploadFile] = File(...)):
             processed_files.append(file.filename)
             logger.info("Saved uploaded PDF: %s", file.filename)
 
+            # Load and parse only this uploaded PDF
+            file_docs = load_single_pdf(destination)
+            if file_docs:
+                new_documents.extend(file_docs)
+
         if not processed_files:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="No valid PDF documents found in upload.",
             )
 
-        # Trigger chunking and vector store indexing
-        documents = load_documents_from_directory(str(DATA_DIR))
-        ingest_to_vector_store(documents)
+        if not new_documents:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Could not extract text from uploaded PDF(s). Please verify they are not blank or password protected.",
+            )
+
+        # Trigger chunking and vector store indexing ONLY on newly uploaded documents
+        ingest_to_vector_store(new_documents)
 
         return IngestResponse(
             status="success",
